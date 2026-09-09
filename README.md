@@ -4,6 +4,14 @@ A hierarchical launcher menu for the macOS menu bar, inspired by **ToolsDaemon**
 
 ToolsSpecter lives as a small icon on the right side of the menu bar. Click it to open your own, self-organized menu: group items into folders and submenus, launch apps/files/URLs or run shell tools, all without touching the Dock or Spotlight.
 
+<img src="screenshots/menu.png" alt="ToolsSpecter menu in action" width="640">
+
+## Editing your menu
+
+Every launcher is arranged visually in the built-in editor — nest items into folders, reorder with drag & drop, or drag apps straight in from Finder.
+
+<img src="screenshots/edit-menu.png" alt="ToolsSpecter Edit menu" width="640">
+
 ## Features
 
 - **Hierarchical text menus** — organize launchers into folders and nested submenus, the ToolsDaemon way
