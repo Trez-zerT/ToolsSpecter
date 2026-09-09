@@ -31,7 +31,7 @@ Every launcher is arranged visually in the built-in editor — nest items into f
 
 ## Install (from a release)
 
-Download the latest `ToolsSpecter-<version>-macOS.zip` from the [Releases](https://github.com/Trez-zerT/ToolsSpecter/releases) page, unzip, and move `ToolsSpecter.app` into `/Applications`.
+Download the latest `ToolsSpecter-<version>-macOS.zip` from the [Releases](https://github.com/Trez-zerT/ToolsSpecter/releases) page — the zip is a **universal binary** that runs on both Apple Silicon and Intel Macs. Unzip and move `ToolsSpecter.app` into `/Applications`.
 
 The app is **not notarized**, so macOS may block the first launch. Fix it once with any of these:
 
@@ -54,7 +54,13 @@ Either option lets the app launch. For **Open at Login** to work, the app must l
 open build/ToolsSpecter.app
 ```
 
-The script compiles in release mode, assembles `build/ToolsSpecter.app`, and ad-hoc codesigns it.
+The script compiles in release mode for the current machine's architecture, assembles `build/ToolsSpecter.app`, and ad-hoc codesigns it.
+
+To build a **universal** binary (Apple Silicon + Intel) and package the release zip:
+
+```sh
+./scripts/make-release.sh
+```
 
 To enable **Open at Login**, move the app into place first:
 
