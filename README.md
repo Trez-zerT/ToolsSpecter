@@ -29,7 +29,31 @@ Every launcher is arranged visually in the built-in editor — nest items into f
 - macOS 13+
 - Xcode Command Line Tools (for `swift build`)
 
-## Build & run
+## Install (from a release)
+
+Download the latest `ToolsSpecter-<version>-macOS.zip` from the [Releases](https://github.com/Trez-zerT/ToolsSpecter/releases) page, unzip, and move `ToolsSpecter.app` into `/Applications`.
+
+The app is **not notarized**, so macOS may block the first launch. Fix it once with any of these:
+
+**Option A — allow it via Finder**
+
+Right-click `ToolsSpecter.app` in Finder → **Open** → **Open**.
+
+**Option B — clear the download quarantine**
+
+```sh
+xattr -dr com.apple.quarantine /Applications/ToolsSpecter.app
+```
+
+**Option C — self-sign it (ad-hoc)**
+
+```sh
+codesign --force --deep --sign - /Applications/ToolsSpecter.app
+```
+
+After signing, launching once with right-click → **Open** may still be needed the first time. For **Open at Login** to work, the app must live in `/Applications`.
+
+## Build from source
 
 ```sh
 ./scripts/make-app.sh
