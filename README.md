@@ -45,13 +45,7 @@ Try to launch the app once — macOS will show a block message. Then open **Syst
 xattr -dr com.apple.quarantine /Applications/ToolsSpecter.app
 ```
 
-**Option C — self-sign it (ad-hoc)**
-
-```sh
-codesign --force --deep --sign - /Applications/ToolsSpecter.app
-```
-
-Note: self-signing alone does not clear Gatekeeper — you'll still need Option A or B the first time you launch. For **Open at Login** to work, the app must live in `/Applications`.
+Either option lets the app launch. For **Open at Login** to work, the app must live in `/Applications`.
 
 ## Build from source
 
