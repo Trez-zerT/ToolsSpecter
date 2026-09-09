@@ -16,6 +16,8 @@ cp "$BIN" "$APP/Contents/MacOS/ToolsSpecter"
 cp Resources/Info.plist "$APP/Contents/Info.plist"
 plutil -lint "$APP/Contents/Info.plist" >/dev/null
 
+./scripts/build-icon.sh "$APP"
+
 echo "==> Ad-hoc codesigning"
 codesign --force --sign - "$APP" >/dev/null 2>&1
 
