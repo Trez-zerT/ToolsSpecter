@@ -35,11 +35,11 @@ Download the latest `ToolsSpecter-<version>-macOS.zip` from the [Releases](https
 
 The app is **not notarized**, so macOS may block the first launch. Fix it once with any of these:
 
-**Option A — allow it via Finder**
+**Option A — allow it in System Settings** (macOS 14+)
 
-Right-click `ToolsSpecter.app` in Finder → **Open** → **Open**.
+Try to launch the app once — macOS will show a block message. Then open **System Settings → Privacy & Security** and, under **Security**, click **Open Anyway** next to the note that ToolsSpecter was blocked.
 
-**Option B — clear the download quarantine**
+**Option B — clear the download quarantine** (most reliable)
 
 ```sh
 xattr -dr com.apple.quarantine /Applications/ToolsSpecter.app
@@ -51,7 +51,7 @@ xattr -dr com.apple.quarantine /Applications/ToolsSpecter.app
 codesign --force --deep --sign - /Applications/ToolsSpecter.app
 ```
 
-After signing, launching once with right-click → **Open** may still be needed the first time. For **Open at Login** to work, the app must live in `/Applications`.
+Note: self-signing alone does not clear Gatekeeper — you'll still need Option A or B the first time you launch. For **Open at Login** to work, the app must live in `/Applications`.
 
 ## Build from source
 
