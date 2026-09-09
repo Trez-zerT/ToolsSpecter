@@ -61,20 +61,23 @@ final class EditorController: NSObject, NSWindowDelegate,
         upButton.toolTip = "Move up"
         downButton.toolTip = "Move down"
 
-        let hint = NSTextField(labelWithString: "New items are added into the selected folder, or to the top level when no folder is selected.")
+        let hint = NSTextField(labelWithString: "New items go into the selected folder, or to the top level when none is selected.")
         hint.font = NSFont.systemFont(ofSize: 11)
         hint.textColor = .secondaryLabelColor
         hint.lineBreakMode = .byWordWrapping
         hint.maximumNumberOfLines = 2
+        hint.preferredMaxLayoutWidth = 0
+        hint.translatesAutoresizingMaskIntoConstraints = false
 
         let spacer = NSView()
         spacer.setContentHuggingPriority(.defaultLow, for: .horizontal)
-        let topBar = NSStackView(views: [addButton, renameButton, removeButton, upButton, downButton, spacer, hint])
+        let topBar = NSStackView(views: [addButton, renameButton, removeButton, upButton, downButton, spacer])
         topBar.orientation = .horizontal
         topBar.alignment = .centerY
         topBar.spacing = 8
         topBar.translatesAutoresizingMaskIntoConstraints = false
         content.addSubview(topBar)
+        content.addSubview(hint)
 
         let column = NSTableColumn(identifier: NSUserInterfaceItemIdentifier("item"))
         column.resizingMask = .autoresizingMask
@@ -101,9 +104,14 @@ final class EditorController: NSObject, NSWindowDelegate,
         NSLayoutConstraint.activate([
             topBar.topAnchor.constraint(equalTo: content.topAnchor, constant: 10),
             topBar.leadingAnchor.constraint(equalTo: content.leadingAnchor, constant: 12),
-            topBar.trailingAnchor.constraint(equalTo: content.trailingAnchor, constant: -12),
+            topBar.trailingAnchor.constraint(lessThanOrEqualTo: content.trailingAnchor, constant: -12),
 
-            scroll.topAnchor.constraint(equalTo: topBar.bottomAnchor, constant: 10),
+            hint.topAnchor.constraint(equalTo: topBar.bottomAnchor, constant: 6),
+            hint.leadingAnchor.constraint(equalTo: content.leadingAnchor, constant: 14),
+            hint.trailingAnchor.constraint(equalTo: content.trailingAnchor, constant: -14),
+            hint.widthAnchor.constraint(lessThanOrEqualToConstant: 460),
+
+            scroll.topAnchor.constraint(equalTo: hint.bottomAnchor, constant: 8),
             scroll.leadingAnchor.constraint(equalTo: content.leadingAnchor, constant: 0),
             scroll.trailingAnchor.constraint(equalTo: content.trailingAnchor, constant: 0),
             scroll.bottomAnchor.constraint(equalTo: content.bottomAnchor, constant: 0)

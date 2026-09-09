@@ -10,7 +10,7 @@ ToolsSpecter lives as a small icon on the right side of the menu bar. Click it t
 
 Every launcher is arranged visually in the built-in editor — nest items into folders, reorder with drag & drop, or drag apps straight in from Finder.
 
-<img src="screenshots/edit-menu.png" alt="ToolsSpecter Edit menu" width="640">
+<img src="screenshots/edit-menu.png?v=2" alt="ToolsSpecter Edit menu" width="640">
 
 ## Features
 
