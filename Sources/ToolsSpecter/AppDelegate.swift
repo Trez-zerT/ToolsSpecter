@@ -16,7 +16,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
+        // A stable autosave name is what macOS and menu bar managers (Thaw,
+        // Hidden Bar, Ice…) use to remember this item's position and visibility.
+        // Without it AppKit assigns a generic name such as "Item-0".
+        item.autosaveName = "ToolsSpecter"
         item.button?.toolTip = "ToolsSpecter"
+        item.button?.identifier = NSUserInterfaceItemIdentifier("local.toolsspecter.status")
+        item.button?.setAccessibilityIdentifier("local.toolsspecter.status")
+        item.button?.setAccessibilityLabel("ToolsSpecter")
         item.button?.target = self
         item.button?.action = #selector(statusItemClicked(_:))
         item.button?.sendAction(on: [.leftMouseUp, .rightMouseUp])
