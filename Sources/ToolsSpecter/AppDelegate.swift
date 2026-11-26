@@ -156,6 +156,26 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         updateStatusItem()
     }
 
+    @objc func setBarGap(_ sender: Any?) {
+        overlay.hide()
+        let store = ConfigStore.shared
+        let alert = NSAlert()
+        alert.messageText = "Divider Gap"
+        alert.informativeText = "Points of empty space between the status item and the first menu title. Increase this to leave room for a menu bar manager's divider."
+        alert.alertStyle = .informational
+        let field = NSTextField(frame: NSRect(x: 0, y: 0, width: 260, height: 24))
+        field.stringValue = String(format: "%.0f", store.barGap)
+        alert.accessoryView = field
+        alert.addButton(withTitle: "OK")
+        alert.addButton(withTitle: "Cancel")
+        alert.window.initialFirstResponder = field
+        NSApp.activate(ignoringOtherApps: true)
+        guard alert.runModal() == .alertFirstButtonReturn else { return }
+        let value = min(max(Double(field.stringValue.trimmingCharacters(in: .whitespaces)) ?? store.barGap, 0), 200)
+        store.barGap = value
+        store.save()
+    }
+
     @objc func toggleVerticalMenu(_ sender: NSMenuItem) {
         let store = ConfigStore.shared
         store.menuStyle = store.menuStyle == .classic ? .horizontal : .classic

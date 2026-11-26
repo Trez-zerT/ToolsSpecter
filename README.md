@@ -20,6 +20,7 @@ Every launcher is arranged visually in the built-in editor — nest items into f
 - **Classic menu** — Option-click the word, or choose Settings… → Menu Bar → Classic Menu, for the original single drop-down
 - **Hierarchical text menus** — organize launchers into folders and nested submenus, the ToolsDaemon way
 - **Menu bar residence** — a lightweight status-bar item (no Dock icon); the Finder-style Applications “A”, your own word, or both, with a one-click vertical-menu toggle
+- **Divider Gap** — leave space between the status item and the first title so a menu bar manager’s divider stays clear (Settings… → Menu Bar)
 - **Launch anything** — applications, files, URLs, and shell commands
 - **Real app icons** in the menu
 - **Built-in app scanning** of `/Applications`, `/System/Applications`, `~/Applications`, and `~/Apps`, plus **Scan Folder…** to add any other location

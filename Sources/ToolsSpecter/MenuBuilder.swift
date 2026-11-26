@@ -147,6 +147,12 @@ final class MenuBuilder: NSObject {
         styleItem.submenu = styleMenu
         menu.addItem(styleItem)
 
+        let gap = NSMenuItem(title: "Divider Gap…",
+                             action: #selector(AppDelegate.setBarGap(_:)),
+                             keyEquivalent: "")
+        gap.target = target
+        menu.addItem(gap)
+
         root.submenu = menu
         return root
     }

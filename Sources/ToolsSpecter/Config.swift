@@ -85,17 +85,20 @@ struct ToolsConfig: Codable {
     var menuStyle: MenuStyle
     var barLabel: String
     var statusItemStyle: StatusItemStyle
+    var barGap: Double
 
     init(root: [ConfigItem] = [],
          extraScanRoots: [String] = [],
          menuStyle: MenuStyle = .horizontal,
          barLabel: String = "Apps",
-         statusItemStyle: StatusItemStyle = .iconAndText) {
+         statusItemStyle: StatusItemStyle = .iconAndText,
+         barGap: Double = 0) {
         self.root = root
         self.extraScanRoots = extraScanRoots
         self.menuStyle = menuStyle
         self.barLabel = barLabel
         self.statusItemStyle = statusItemStyle
+        self.barGap = barGap
     }
 
     init(from decoder: Decoder) throws {
@@ -105,6 +108,7 @@ struct ToolsConfig: Codable {
         menuStyle = try c.decodeIfPresent(MenuStyle.self, forKey: .menuStyle) ?? .horizontal
         barLabel = try c.decodeIfPresent(String.self, forKey: .barLabel) ?? "Apps"
 
+        barGap = try c.decodeIfPresent(Double.self, forKey: .barGap) ?? 0
         if let style = try c.decodeIfPresent(StatusItemStyle.self, forKey: .statusItemStyle) {
             statusItemStyle = style
         } else {
@@ -226,6 +230,7 @@ final class ConfigStore {
     var menuStyle: MenuStyle
     var barLabel: String
     var statusItemStyle: StatusItemStyle
+    var barGap: Double
 
     private init() {
         let base = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
@@ -242,6 +247,7 @@ final class ConfigStore {
         var loadedStyle = MenuStyle.horizontal
         var loadedLabel = "Apps"
         var loadedStatusStyle = StatusItemStyle.iconAndText
+        var loadedGap: Double = 0
         if FileManager.default.fileExists(atPath: fileURL.path),
            let data = try? Data(contentsOf: fileURL),
            let config = try? JSONDecoder().decode(ToolsConfig.self, from: data) {
@@ -250,12 +256,14 @@ final class ConfigStore {
             loadedStyle = config.menuStyle
             loadedLabel = config.barLabel.trimmingCharacters(in: .whitespaces)
             loadedStatusStyle = config.statusItemStyle
+            loadedGap = config.barGap
         }
         extraScanRoots = loadedExtra
         root = loadedRoot.map { Node(item: $0) }
         menuStyle = loadedStyle
         barLabel = loadedLabel
         statusItemStyle = loadedStatusStyle
+        barGap = loadedGap
 
         if !FileManager.default.fileExists(atPath: fileURL.path) {
             root = Self.seedRoot()
@@ -390,7 +398,8 @@ final class ConfigStore {
             extraScanRoots: extraScanRoots,
             menuStyle: menuStyle,
             barLabel: barLabel,
-            statusItemStyle: statusItemStyle
+            statusItemStyle: statusItemStyle,
+            barGap: barGap
         )
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]

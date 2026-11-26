@@ -331,7 +331,9 @@ final class MenuBarOverlayController: NSObject {
             }
         }
 
-        let rightEdge = min(max(mouse.x - localX, screen.frame.minX + 80), screen.frame.maxX)
+        let wordLeft = mouse.x - localX
+        let gap = CGFloat(ConfigStore.shared.barGap)
+        let rightEdge = min(max(wordLeft - gap, screen.frame.minX + 80), screen.frame.maxX)
         let availableWidth = rightEdge - screen.frame.minX
         guard availableWidth > 80 else { return }
 
@@ -354,7 +356,7 @@ final class MenuBarOverlayController: NSObject {
         barView.layoutSubtreeIfNeeded()
         barView.needsDisplay = true
 
-        wordRect = NSRect(x: rightEdge - itemWidth,
+        wordRect = NSRect(x: wordLeft - itemWidth,
                           y: screen.frame.maxY - height,
                           width: itemWidth * 3,
                           height: height)
