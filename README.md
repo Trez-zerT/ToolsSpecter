@@ -6,7 +6,15 @@ ToolsSpecter lives in the menu bar as the Applications “A” and the word **Ap
 
 Choose **Icon and Text**, **Icon Only**, or **Text Only** — plus the word itself and a classic single-menu mode — under **Settings… → Menu Bar** (right-click the word). **Option-clicking** the word opens the classic menu directly.
 
-<img src="screenshots/menu.png" alt="ToolsSpecter classic menu in action" width="640">
+<img src="screenshots/horizontal-menu.png" alt="ToolsSpecter horizontal menu bar" width="680">
+
+*The horizontal menu bar: folder titles run right-to-left from the status item; hover or click a title for its menu.*
+
+## Classic menu
+
+Option-click the word (or choose Settings… → Menu Bar → Vertical Menu (Classic)) for the original single drop-down.
+
+<img src="screenshots/menu.png" alt="ToolsSpecter classic menu" width="420">
 
 ## Editing your menu
 
@@ -17,7 +25,7 @@ Every launcher is arranged visually in the built-in editor — nest items into f
 ## Features
 
 - **Horizontal menu bar** — click the word or icon (default Applications “A” + “Apps”); folder titles expand right-to-left and dropdowns open on hover, with the menu bar’s own font and colors
-- **Classic menu** — Option-click the word, or choose Settings… → Menu Bar → Classic Menu, for the original single drop-down
+- **Classic menu** — Option-click the word, or choose Settings… → Menu Bar → Vertical Menu (Classic), for the original single drop-down
 - **Hierarchical text menus** — organize launchers into folders and nested submenus, the ToolsDaemon way
 - **Menu bar residence** — a lightweight status-bar item (no Dock icon); the Finder-style Applications “A”, your own word, or both, with a one-click vertical-menu toggle
 - **Divider Gap** — leave space between the status item and the first title so a menu bar manager’s divider stays clear (Settings… → Menu Bar)
@@ -29,7 +37,7 @@ Every launcher is arranged visually in the built-in editor — nest items into f
 - **Open at Login** support
 - No Xcode project needed — build with a single script
 
-> **macOS 26:** if the word is missing, allow ToolsSpecter under **System Settings → Menu Bar → Allow in the Menu Bar**. If you use a menu bar manager such as Thaw or Ice, make sure ToolsSpecter isn’t in its hidden section.
+> **macOS 26/27:** if the word is missing, allow ToolsSpecter under **System Settings → Menu Bar → Allow in the Menu Bar**. If you use a menu bar manager such as Thaw or Ice, make sure ToolsSpecter isn’t in its hidden section.
 
 ## Requirements
 
