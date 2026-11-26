@@ -1,7 +1,7 @@
 import AppKit
 
-/// Builds the launcher menus from the config tree. Shared by the classic
-/// status-item menu and the horizontal menu bar overlay so both stay in sync.
+/// Builds the launcher menus from the config tree. Shared by the Mac-style
+/// status-item menu and the Amiga-style menu bar overlay so both stay in sync.
 final class MenuBuilder: NSObject {
 
     weak var target: AnyObject?
@@ -42,7 +42,7 @@ final class MenuBuilder: NSObject {
 
     // MARK: - Status menus
 
-    /// The full classic menu: launcher tree, settings, quit.
+    /// The full Mac-style menu: launcher tree, settings, quit.
     func statusMenu() -> NSMenu {
         let menu = NSMenu()
         for node in ConfigStore.shared.root {
@@ -65,7 +65,7 @@ final class MenuBuilder: NSObject {
     /// Settings only, shown on right-click.
     func settingsMenu() -> NSMenu {
         let menu = NSMenu()
-        let vertical = NSMenuItem(title: "Use Vertical Menu",
+        let vertical = NSMenuItem(title: "Use Mac-style Menu",
                                   action: #selector(AppDelegate.toggleVerticalMenu(_:)),
                                   keyEquivalent: "")
         vertical.target = target

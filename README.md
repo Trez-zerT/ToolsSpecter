@@ -4,17 +4,17 @@ A hierarchical launcher menu for the macOS menu bar, inspired by **ToolsDaemon**
 
 ToolsSpecter lives in the menu bar as the Applications “A” and the word **Apps** — or just one of them. Click it and your top-level groups appear as titles running right-to-left across the menu bar, matching the system appearance; hover a title to drop its menu, or click it. Group items into folders and submenus, launch apps/files/URLs or run shell tools, all without touching the Dock or Spotlight.
 
-Choose **Icon and Text**, **Icon Only**, or **Text Only** — plus the word itself and a classic single-menu mode — under **Settings… → Menu Bar** (right-click the word). **Option-clicking** the word opens the classic menu directly.
+Choose **Icon and Text**, **Icon Only**, or **Text Only** — plus the word itself and a Mac-style menu — under **Settings… → Menu Bar** (right-click the word). **Option-clicking** the word opens the Mac-style menu directly.
 
-<img src="screenshots/horizontal-menu.png" alt="ToolsSpecter horizontal menu bar" width="680">
+<img src="screenshots/horizontal-menu.png" alt="ToolsSpecter Amiga-style menu bar" width="680">
 
-*The horizontal menu bar: folder titles run right-to-left from the status item; hover or click a title for its menu.*
+*The Amiga-style menu bar: folder titles run right-to-left from the status item; hover or click a title for its menu.*
 
-## Classic menu
+## Mac-style menu
 
-Option-click the word (or choose Settings… → Menu Bar → Vertical Menu (Classic)) for the original single drop-down.
+Option-click the word (or choose Settings… → Menu Bar → Mac-style Menu) for the original single drop-down.
 
-<img src="screenshots/menu.png" alt="ToolsSpecter classic menu" width="420">
+<img src="screenshots/menu.png" alt="ToolsSpecter Mac-style menu" width="420">
 
 ## Editing your menu
 
@@ -24,10 +24,10 @@ Every launcher is arranged visually in the built-in editor — nest items into f
 
 ## Features
 
-- **Horizontal menu bar** — click the word or icon (default Applications “A” + “Apps”); folder titles expand right-to-left and dropdowns open on hover, with the menu bar’s own font and colors
-- **Classic menu** — Option-click the word, or choose Settings… → Menu Bar → Vertical Menu (Classic), for the original single drop-down
+- **Amiga-style menu** — click the word or icon (default Applications “A” + “Apps”); folder titles expand right-to-left and dropdowns open on hover, with the menu bar’s own font and colors
+- **Mac-style menu** — Option-click the word, or choose Settings… → Menu Bar → Mac-style Menu, for the original single drop-down
 - **Hierarchical text menus** — organize launchers into folders and nested submenus, the ToolsDaemon way
-- **Menu bar residence** — a lightweight status-bar item (no Dock icon); the Finder-style Applications “A”, your own word, or both, with a one-click vertical-menu toggle
+- **Menu bar residence** — a lightweight status-bar item (no Dock icon); the Finder-style Applications “A”, your own word, or both, with a one-click Mac-style menu toggle
 - **Divider Gap** — leave space between the status item and the first title so a menu bar manager’s divider stays clear (Settings… → Menu Bar)
 - **Launch anything** — applications, files, URLs, and shell commands
 - **Real app icons** in the menu

@@ -69,8 +69,8 @@ enum MenuStyle: String, Codable, CaseIterable {
 
     var label: String {
         switch self {
-        case .horizontal: return "Horizontal Menu Bar"
-        case .classic: return "Vertical Menu (Classic)"
+        case .horizontal: return "Amiga-style Menu"
+        case .classic: return "Mac-style Menu"
         }
     }
 }
