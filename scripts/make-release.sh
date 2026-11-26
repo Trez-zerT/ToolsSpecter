@@ -10,7 +10,7 @@ echo "==> Building x86_64 (release)"
 swift build -c release --triple x86_64-apple-macosx13.0 --scratch-path .build-x64
 
 APP="build/ToolsSpecter.app"
-VERSION="1.1.0"
+VERSION="1.1.1"
 ZIP="build/ToolsSpecter-${VERSION}-macOS.zip"
 
 echo "==> Assembling universal $APP"

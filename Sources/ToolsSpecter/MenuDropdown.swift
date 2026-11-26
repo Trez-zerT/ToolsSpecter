@@ -247,11 +247,12 @@ final class MenuDropdownController {
         panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .stationary, .ignoresCycle]
         panel.backgroundColor = .clear
         panel.isOpaque = false
-        panel.appearance = NSApp.effectiveAppearance
+        let appearance = NSApp.effectiveAppearance
+        panel.appearance = appearance
         panel.parentPanel = parent
         panel.listView = list
 
-        let container = MenuContainerView(content: list, size: list.preferredSize)
+        let container = MenuContainerView(content: list, size: list.preferredSize, appearance: appearance)
         panel.contentView = container
 
         list.onHover = { [weak self, weak panel] row in
@@ -357,14 +358,21 @@ final class MenuDropdownController {
 // MARK: - Container
 
 private final class MenuContainerView: NSView {
-    init(content: NSView, size: NSSize) {
+    init(content: NSView, size: NSSize, appearance: NSAppearance) {
         super.init(frame: NSRect(origin: .zero, size: size))
+        self.appearance = appearance
         wantsLayer = true
-        layer?.backgroundColor = NSColor.windowBackgroundColor.cgColor
+        var background: CGColor?
+        var border: CGColor?
+        appearance.performAsCurrentDrawingAppearance {
+            background = NSColor.windowBackgroundColor.cgColor
+            border = NSColor.separatorColor.withAlphaComponent(0.7).cgColor
+        }
+        layer?.backgroundColor = background
         layer?.cornerRadius = 10
         layer?.masksToBounds = true
         layer?.borderWidth = 0.5
-        layer?.borderColor = NSColor.separatorColor.withAlphaComponent(0.7).cgColor
+        layer?.borderColor = border
         content.frame = bounds
         content.autoresizingMask = [.width, .height]
         addSubview(content)
