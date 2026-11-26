@@ -68,7 +68,13 @@ enum AppScanner {
     }
 
     static func icon(for path: String) -> NSImage? {
+        if let cached = iconCache[path] {
+            return cached
+        }
         let image = NSWorkspace.shared.icon(forFile: path)
+        iconCache[path] = image
         return image
     }
+
+    private static var iconCache: [String: NSImage] = [:]
 }

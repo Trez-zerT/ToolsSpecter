@@ -10,7 +10,7 @@ echo "==> Building x86_64 (release)"
 swift build -c release --triple x86_64-apple-macosx13.0 --scratch-path .build-x64
 
 APP="build/ToolsSpecter.app"
-VERSION="1.0.0"
+VERSION="1.1.0"
 ZIP="build/ToolsSpecter-${VERSION}-macOS.zip"
 
 echo "==> Assembling universal $APP"
@@ -24,6 +24,7 @@ cp Resources/Info.plist "$APP/Contents/Info.plist"
 plutil -lint "$APP/Contents/Info.plist" >/dev/null
 
 ./scripts/build-icon.sh "$APP"
+cp Resources/ApplicationsA.png "$APP/Contents/Resources/ApplicationsA.png"
 
 echo "==> Ad-hoc codesigning"
 codesign --force --sign - "$APP" >/dev/null 2>&1

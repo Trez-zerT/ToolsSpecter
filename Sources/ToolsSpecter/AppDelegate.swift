@@ -1,132 +1,137 @@
 import AppKit
 
-final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
+final class AppDelegate: NSObject, NSApplicationDelegate {
 
     private var statusItem: NSStatusItem!
-    private var statusMenu: NSMenu!
+    private var builder: MenuBuilder!
+    private var overlay: MenuBarOverlayController!
     private var editorController: EditorController?
     private var pickerController: AppPickerController?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        builder = MenuBuilder(target: self)
+        overlay = MenuBarOverlayController()
+        overlay.onVisibilityChange = { [weak self] visible in
+            self?.statusItem.button?.highlight(visible)
+        }
+
         let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         item.button?.toolTip = "ToolsSpecter"
+        item.button?.target = self
+        item.button?.action = #selector(statusItemClicked(_:))
+        item.button?.sendAction(on: [.leftMouseUp, .rightMouseUp])
         statusItem = item
 
-        let menu = NSMenu()
-        menu.delegate = self
-        statusMenu = menu
-        item.menu = menu
-
-        updateStatusIcon()
+        updateStatusItem()
+        warmIconCacheSoon()
     }
 
-    private func updateStatusIcon() {
+    /// Loading app icons from disk is the slow part of building a dropdown.
+    /// Warm the cache once at launch, one icon per run loop turn.
+    private func warmIconCacheSoon() {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [weak self] in
+            var paths: [String] = []
+            func walk(_ nodes: [Node]) {
+                for node in nodes {
+                    if let target = node.item.target,
+                       node.item.kind == .app || node.item.kind == .file {
+                        paths.append(target)
+                    }
+                    walk(node.children)
+                }
+            }
+            walk(ConfigStore.shared.root)
+            self?.warmIcon(at: 0, paths: paths)
+        }
+    }
+
+    private func warmIcon(at index: Int, paths: [String]) {
+        guard index < paths.count else { return }
+        _ = AppScanner.icon(for: paths[index])
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) { [weak self] in
+            self?.warmIcon(at: index + 1, paths: paths)
+        }
+    }
+
+    // MARK: - Status item
+
+    private func updateStatusItem() {
         guard let button = statusItem.button else { return }
-        guard let image = IconCatalog.image(named: ConfigStore.shared.iconName) else { return }
-        let config = NSImage.SymbolConfiguration(pointSize: 15, weight: .regular)
-        let configured = image.withSymbolConfiguration(config) ?? image
-        configured.isTemplate = true
-        button.image = configured
-    }
-
-    // MARK: - Menu building
-
-    func menuNeedsUpdate(_ menu: NSMenu) {
-        guard menu === statusMenu else { return }
-        menu.removeAllItems()
         let store = ConfigStore.shared
 
-        for node in store.root {
-            append(node: node, to: menu)
+        let label = store.barLabel.isEmpty ? "Apps" : store.barLabel
+        button.font = NSFont.menuBarFont(ofSize: 0)
+        button.imagePosition = .imageLeading
+        button.imageScaling = .scaleProportionallyDown
+
+        switch store.statusItemStyle {
+        case .iconAndText:
+            button.title = label
+            button.image = IconCatalog.applicationsGlyph()
+        case .iconOnly:
+            button.title = ""
+            button.image = IconCatalog.applicationsGlyph()
+        case .textOnly:
+            button.title = label
+            button.image = nil
         }
-
-        if menu.numberOfItems > 0 {
-            menu.addItem(.separator())
-        }
-
-        let settingsItem = NSMenuItem(title: "Settings…", action: nil, keyEquivalent: "")
-        settingsItem.image = menuImage(named: "gearshape")
-        let settingsMenu = NSMenu(title: "Settings…")
-        settingsItem.submenu = settingsMenu
-
-        let edit = NSMenuItem(title: "Edit menu…", action: #selector(openEditor(_:)), keyEquivalent: ",")
-        edit.target = self
-        edit.image = menuImage(named: "slider.horizontal.3")
-        settingsMenu.addItem(edit)
-
-        let iconItem = NSMenuItem(title: "Status Icon", action: nil, keyEquivalent: "")
-        let iconMenu = NSMenu(title: "Status Icon")
-        for name in IconCatalog.all {
-            let symbol = IconCatalog.image(named: name)
-            let configured = symbol.flatMap { $0.withSymbolConfiguration(NSImage.SymbolConfiguration(pointSize: 14, weight: .regular)) } ?? symbol
-            let mi = NSMenuItem(title: displayName(forSymbol: name),
-                                action: #selector(selectIcon(_:)),
-                                keyEquivalent: "")
-            mi.target = self
-            mi.representedObject = name
-            mi.image = configured
-            mi.state = (name == store.iconName) ? .on : .off
-            iconMenu.addItem(mi)
-        }
-        iconItem.submenu = iconMenu
-        settingsMenu.addItem(iconItem)
-
-        let login = NSMenuItem(title: "Open at Login",
-                               action: #selector(toggleLogin(_:)),
-                               keyEquivalent: "")
-        login.target = self
-        login.isEnabled = LoginItem.isInApplications
-        login.toolTip = LoginItem.isInApplications ? nil : "Move ToolsSpecter.app to /Applications to enable"
-        login.state = LoginItem.isEnabled ? .on : .off
-        settingsMenu.addItem(login)
-
-        menu.addItem(settingsItem)
-
-        menu.addItem(.separator())
-        let quit = NSMenuItem(title: "Quit ToolsSpecter", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
-        quit.target = NSApp
-        menu.addItem(quit)
     }
 
-    private func append(node: Node, to menu: NSMenu) {
-        let item = node.item
-        if node.isSeparator {
-            menu.addItem(.separator())
+    @objc private func statusItemClicked(_ sender: NSStatusBarButton) {
+        let event = NSApp.currentEvent
+        let isRightClick = event?.type == .rightMouseUp
+        let isOptionClick = NSEvent.modifierFlags.contains(.option)
+            || (event?.modifierFlags.contains(.option) ?? false)
+
+        let suppressed = overlay.consumeDismissedStatusClick()
+        if suppressed {
             return
         }
-        let mi = NSMenuItem(title: item.title.isEmpty ? "(untitled)" : item.title,
-                            action: node.isFolder ? nil : #selector(launchItem(_:)),
-                            keyEquivalent: "")
-        if !node.isFolder {
-            mi.target = self
-            mi.representedObject = item
+
+        if isRightClick {
+            overlay.hide()
+            popUp(builder.settingsMenu(), from: sender)
+            return
         }
-        if let icon = Launcher.icon(for: item) {
-            mi.image = icon
-            mi.image?.size = NSSize(width: 16, height: 16)
+        if isOptionClick {
+            overlay.hide()
+            popUp(builder.statusMenu(), from: sender)
+            return
         }
-        if node.isFolder {
-            let submenu = NSMenu(title: item.title)
-            for child in node.children {
-                append(node: child, to: submenu)
-            }
-            mi.submenu = submenu
+
+        if ConfigStore.shared.menuStyle == .classic {
+            popUp(builder.statusMenu(), from: sender)
+        } else {
+            overlay.toggle(anchor: sender, event: event)
         }
-        menu.addItem(mi)
     }
 
-    private func displayName(forSymbol name: String) -> String {
-        name
+    private func popUp(_ menu: NSMenu, from button: NSStatusBarButton) {
+        // Status item windows have no usable geometry on recent macOS, so anchor
+        // menus to the click position instead.
+        let mouse = NSEvent.mouseLocation
+        menu.popUp(positioning: nil,
+                   at: NSPoint(x: mouse.x - 12, y: mouse.y - 8),
+                   in: nil)
     }
 
     // MARK: - Actions
 
-    @objc private func launchItem(_ sender: NSMenuItem) {
+    @objc func launchItem(_ sender: NSMenuItem) {
         guard let item = sender.representedObject as? ConfigItem else { return }
         Launcher.open(item)
+        if overlay.isOpen {
+            // Let the menu finish tracking before tearing the bar down.
+            DispatchQueue.main.async { [weak self] in
+                self?.overlay.hide()
+            }
+        }
     }
 
-    @objc private func openEditor(_ sender: Any?) {
+    @objc func openEditor(_ sender: Any?) {
+        if overlay.isOpen {
+            overlay.hide()
+        }
         NSApp.activate(ignoringOtherApps: true)
         if editorController == nil {
             editorController = EditorController()
@@ -134,14 +139,58 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         editorController?.show()
     }
 
-    @objc private func selectIcon(_ sender: NSMenuItem) {
-        guard let name = sender.representedObject as? String else { return }
-        ConfigStore.shared.iconName = name
-        ConfigStore.shared.save()
-        updateStatusIcon()
+    @objc func selectStatusItemStyle(_ sender: NSMenuItem) {
+        guard let raw = sender.representedObject as? String,
+              let style = StatusItemStyle(rawValue: raw) else { return }
+        let store = ConfigStore.shared
+        store.statusItemStyle = style
+        store.save()
+        sender.state = .on
+        updateStatusItem()
     }
 
-    @objc private func toggleLogin(_ sender: NSMenuItem) {
+    @objc func toggleVerticalMenu(_ sender: NSMenuItem) {
+        let store = ConfigStore.shared
+        store.menuStyle = store.menuStyle == .classic ? .horizontal : .classic
+        store.save()
+        sender.state = store.menuStyle == .classic ? .on : .off
+        updateStatusItem()
+        if store.menuStyle == .classic {
+            overlay.hide()
+        }
+    }
+
+    @objc func selectMenuStyle(_ sender: NSMenuItem) {
+        guard let raw = sender.representedObject as? String,
+              let style = MenuStyle(rawValue: raw) else { return }
+        overlay.hide()
+        ConfigStore.shared.menuStyle = style
+        ConfigStore.shared.save()
+        updateStatusItem()
+    }
+
+    @objc func renameBarLabel(_ sender: Any?) {
+        overlay.hide()
+        let store = ConfigStore.shared
+        let alert = NSAlert()
+        alert.messageText = "Menu Bar Label"
+        alert.informativeText = "The word shown in the menu bar. The Status Item setting controls whether the icon, the word, or both are shown."
+        alert.alertStyle = .informational
+        let field = NSTextField(frame: NSRect(x: 0, y: 0, width: 260, height: 24))
+        field.stringValue = store.barLabel
+        alert.accessoryView = field
+        alert.addButton(withTitle: "OK")
+        alert.addButton(withTitle: "Cancel")
+        alert.window.initialFirstResponder = field
+        NSApp.activate(ignoringOtherApps: true)
+        guard alert.runModal() == .alertFirstButtonReturn else { return }
+        let trimmed = field.stringValue.trimmingCharacters(in: .whitespaces)
+        store.barLabel = trimmed
+        store.save()
+        updateStatusItem()
+    }
+
+    @objc func toggleLogin(_ sender: NSMenuItem) {
         let wantEnabled = !LoginItem.isEnabled
         do {
             try LoginItem.setEnabled(wantEnabled)
@@ -150,6 +199,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             alert.messageText = "Could not change login item"
             alert.informativeText = error.localizedDescription
             alert.alertStyle = .warning
+            NSApp.activate(ignoringOtherApps: true)
             alert.runModal()
         }
         sender.state = LoginItem.isEnabled ? .on : .off

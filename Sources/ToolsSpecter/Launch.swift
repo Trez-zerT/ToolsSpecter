@@ -57,8 +57,17 @@ enum Launcher {
             return
         }
         let url = URL(fileURLWithPath: path)
-        let ok = NSWorkspace.shared.open(url)
-        if !ok { NSSound.beep() }
+        // Launch through `open` so the launched app is not attributed to
+        // ToolsSpecter as its responsible process (which can trigger macOS's
+        // App Management prompt for self-updating apps).
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: "/usr/bin/open")
+        process.arguments = [url.path]
+        do {
+            try process.run()
+        } catch {
+            if !NSWorkspace.shared.open(url) { NSSound.beep() }
+        }
     }
 
     private static func openFile(_ item: ConfigItem) {

@@ -2,9 +2,11 @@
 
 A hierarchical launcher menu for the macOS menu bar, inspired by **ToolsDaemon** on the Amiga — a user-arranged tree of text menus that launches your apps and tools from anywhere.
 
-ToolsSpecter lives as a small icon on the right side of the menu bar. Click it to open your own, self-organized menu: group items into folders and submenus, launch apps/files/URLs or run shell tools, all without touching the Dock or Spotlight.
+ToolsSpecter lives in the menu bar as the Applications “A” and the word **Apps** — or just one of them. Click it and your top-level groups appear as titles running right-to-left across the menu bar, matching the system appearance; hover a title to drop its menu, or click it. Group items into folders and submenus, launch apps/files/URLs or run shell tools, all without touching the Dock or Spotlight.
 
-<img src="screenshots/menu.png" alt="ToolsSpecter menu in action" width="640">
+Choose **Icon and Text**, **Icon Only**, or **Text Only** — plus the word itself and a classic single-menu mode — under **Settings… → Menu Bar** (right-click the word). **Option-clicking** the word opens the classic menu directly.
+
+<img src="screenshots/menu.png" alt="ToolsSpecter classic menu in action" width="640">
 
 ## Editing your menu
 
@@ -14,8 +16,10 @@ Every launcher is arranged visually in the built-in editor — nest items into f
 
 ## Features
 
+- **Horizontal menu bar** — click the word or icon (default Applications “A” + “Apps”); folder titles expand right-to-left and dropdowns open on hover, with the menu bar’s own font and colors
+- **Classic menu** — Option-click the word, or choose Settings… → Menu Bar → Classic Menu, for the original single drop-down
 - **Hierarchical text menus** — organize launchers into folders and nested submenus, the ToolsDaemon way
-- **Menu bar residence** — a lightweight status-bar item (no Dock icon); pick from several glyph styles
+- **Menu bar residence** — a lightweight status-bar item (no Dock icon); the Finder-style Applications “A”, your own word, or both, with a one-click vertical-menu toggle
 - **Launch anything** — applications, files, URLs, and shell commands
 - **Real app icons** in the menu
 - **Built-in app scanning** of `/Applications`, `/System/Applications`, `~/Applications`, and `~/Apps`, plus **Scan Folder…** to add any other location
@@ -23,6 +27,8 @@ Every launcher is arranged visually in the built-in editor — nest items into f
 - **Live config** — every change is saved to `~/Library/Application Support/ToolsSpecter/config.json` and reflected the next time the menu opens
 - **Open at Login** support
 - No Xcode project needed — build with a single script
+
+> **macOS 26:** if the word is missing, allow ToolsSpecter under **System Settings → Menu Bar → Allow in the Menu Bar**. If you use a menu bar manager such as Thaw or Ice, make sure ToolsSpecter isn’t in its hidden section.
 
 ## Requirements
 

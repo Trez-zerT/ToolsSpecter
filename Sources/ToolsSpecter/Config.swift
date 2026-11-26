@@ -49,45 +49,146 @@ struct ConfigItem: Codable, Identifiable {
     }
 }
 
+enum StatusItemStyle: String, Codable, CaseIterable {
+    case iconAndText
+    case iconOnly
+    case textOnly
+
+    var label: String {
+        switch self {
+        case .iconAndText: return "Icon and Text"
+        case .iconOnly: return "Icon Only"
+        case .textOnly: return "Text Only"
+        }
+    }
+}
+
+enum MenuStyle: String, Codable, CaseIterable {
+    case horizontal
+    case classic
+
+    var label: String {
+        switch self {
+        case .horizontal: return "Horizontal Menu Bar"
+        case .classic: return "Vertical Menu (Classic)"
+        }
+    }
+}
+
 struct ToolsConfig: Codable {
-    var iconName: String
+    private enum LegacyCodingKeys: String, CodingKey {
+        case showGlyph
+    }
+
     var root: [ConfigItem]
     var extraScanRoots: [String]
+    var menuStyle: MenuStyle
+    var barLabel: String
+    var statusItemStyle: StatusItemStyle
 
-    init(iconName: String = "list.bullet.indent",
-         root: [ConfigItem] = [],
-         extraScanRoots: [String] = []) {
-        self.iconName = iconName
+    init(root: [ConfigItem] = [],
+         extraScanRoots: [String] = [],
+         menuStyle: MenuStyle = .horizontal,
+         barLabel: String = "Apps",
+         statusItemStyle: StatusItemStyle = .iconAndText) {
         self.root = root
         self.extraScanRoots = extraScanRoots
+        self.menuStyle = menuStyle
+        self.barLabel = barLabel
+        self.statusItemStyle = statusItemStyle
     }
 
     init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
-        iconName = try c.decodeIfPresent(String.self, forKey: .iconName) ?? "list.bullet.indent"
         root = try c.decodeIfPresent([ConfigItem].self, forKey: .root) ?? []
         extraScanRoots = try c.decodeIfPresent([String].self, forKey: .extraScanRoots) ?? []
+        menuStyle = try c.decodeIfPresent(MenuStyle.self, forKey: .menuStyle) ?? .horizontal
+        barLabel = try c.decodeIfPresent(String.self, forKey: .barLabel) ?? "Apps"
+
+        if let style = try c.decodeIfPresent(StatusItemStyle.self, forKey: .statusItemStyle) {
+            statusItemStyle = style
+        } else {
+            let legacy = try decoder.container(keyedBy: LegacyCodingKeys.self)
+            if let glyph = try legacy.decodeIfPresent(Bool.self, forKey: .showGlyph) {
+                statusItemStyle = glyph ? .iconAndText : .textOnly
+            } else {
+                statusItemStyle = .iconAndText
+            }
+        }
     }
 }
 
 enum IconCatalog {
-    static let all: [String] = [
-        "list.bullet.indent",
-        "line.3.horizontal",
-        "line.3.horizontal.decrease",
-        "list.bullet",
-        "list.bullet.rectangle",
-        "menucard",
-        "flowchart",
-        "menubar.arrow.down.rectangle"
-    ]
 
-    static func image(named name: String) -> NSImage? {
-        guard !all.contains(name) else {
-            return NSImage(systemSymbolName: name, accessibilityDescription: "ToolsSpecter")
+    private static var applicationsGraphic: NSImage?
+
+    /// The Applications "A" made of a pencil, ruler and brush, drawn in the
+    /// menu bar's template style so it tints with the system appearance.
+    static func applicationsGlyph() -> NSImage {
+        if let applicationsGraphic { return applicationsGraphic }
+
+        if let url = Bundle.main.url(forResource: "ApplicationsA", withExtension: "png"),
+           let image = NSImage(contentsOf: url) {
+            let height: CGFloat = 18
+            let width = max(1, height * (image.size.width / max(image.size.height, 1)))
+            image.size = NSSize(width: width, height: height)
+            image.isTemplate = true
+            applicationsGraphic = image
+            return image
         }
-        return NSImage(systemSymbolName: "list.bullet.indent", accessibilityDescription: "ToolsSpecter")
+
+        let size: CGFloat = 18
+        let image = NSImage(size: NSSize(width: size, height: size))
+        image.lockFocus()
+        NSColor.clear.setFill()
+        NSRect(x: 0, y: 0, width: size, height: size).fill()
+        NSColor.black.set()
+
+        func stroke(_ a: NSPoint, _ b: NSPoint, _ width: CGFloat,
+                    _ cap: NSBezierPath.LineCapStyle = .round) {
+            let path = NSBezierPath()
+            path.lineWidth = width
+            path.lineCapStyle = cap
+            path.move(to: a)
+            path.line(to: b)
+            path.stroke()
+        }
+
+        // Pencil (left leg) with its sharpened tip.
+        stroke(NSPoint(x: 3.6, y: 4.0), NSPoint(x: 7.2, y: 13.2), 1.9)
+        let tip = NSBezierPath()
+        tip.move(to: NSPoint(x: 6.2, y: 12.4))
+        tip.line(to: NSPoint(x: 8.3, y: 15.7))
+        tip.line(to: NSPoint(x: 4.9, y: 14.6))
+        tip.close()
+        tip.fill()
+
+        // Ruler (right leg) with tick marks.
+        stroke(NSPoint(x: 10.8, y: 14.6), NSPoint(x: 14.4, y: 3.4), 2.2, .square)
+        let direction = NSPoint(x: 3.6, y: -11.2)
+        let length = (direction.x * direction.x + direction.y * direction.y).squareRoot()
+        let perpendicular = NSPoint(x: -direction.y / length, y: direction.x / length)
+        for t in [0.28, 0.5, 0.72] {
+            let base = NSPoint(x: 10.8 + direction.x * t, y: 14.6 + direction.y * t)
+            let path = NSBezierPath()
+            path.lineWidth = 0.8
+            path.lineCapStyle = .round
+            path.move(to: NSPoint(x: base.x - perpendicular.x * 1.2,
+                                  y: base.y - perpendicular.y * 1.2))
+            path.line(to: NSPoint(x: base.x + perpendicular.x * 1.5,
+                                  y: base.y + perpendicular.y * 1.5))
+            path.stroke()
+        }
+
+        // Brush (crossbar).
+        stroke(NSPoint(x: 5.8, y: 9.0), NSPoint(x: 12.2, y: 9.0), 1.5)
+
+        image.unlockFocus()
+        image.isTemplate = true
+        applicationsGraphic = image
+        return image
     }
+
 }
 
 final class Node {
@@ -120,9 +221,11 @@ final class ConfigStore {
     static let shared = ConfigStore()
 
     let fileURL: URL
-    var iconName: String
     var extraScanRoots: [String]
     var root: [Node] = []
+    var menuStyle: MenuStyle
+    var barLabel: String
+    var statusItemStyle: StatusItemStyle
 
     private init() {
         let base = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
@@ -134,17 +237,25 @@ final class ConfigStore {
             Self.migrateFromOldLocation(base: base, to: fileURL)
         }
 
-        let defaults = (iconName: "list.bullet.indent", root: [ConfigItem](), extra: [String]())
-        var loaded = defaults
-        if FileManager.default.fileExists(atPath: fileURL.path) {
-            if let data = try? Data(contentsOf: fileURL),
-               let config = try? JSONDecoder().decode(ToolsConfig.self, from: data) {
-                loaded = (config.iconName, config.root, config.extraScanRoots)
-            }
+        var loadedRoot: [ConfigItem] = []
+        var loadedExtra: [String] = []
+        var loadedStyle = MenuStyle.horizontal
+        var loadedLabel = "Apps"
+        var loadedStatusStyle = StatusItemStyle.iconAndText
+        if FileManager.default.fileExists(atPath: fileURL.path),
+           let data = try? Data(contentsOf: fileURL),
+           let config = try? JSONDecoder().decode(ToolsConfig.self, from: data) {
+            loadedRoot = config.root
+            loadedExtra = config.extraScanRoots
+            loadedStyle = config.menuStyle
+            loadedLabel = config.barLabel.trimmingCharacters(in: .whitespaces)
+            loadedStatusStyle = config.statusItemStyle
         }
-        iconName = loaded.iconName.isEmpty ? defaults.iconName : loaded.iconName
-        extraScanRoots = loaded.extra
-        root = loaded.root.map { Node(item: $0) }
+        extraScanRoots = loadedExtra
+        root = loadedRoot.map { Node(item: $0) }
+        menuStyle = loadedStyle
+        barLabel = loadedLabel
+        statusItemStyle = loadedStatusStyle
 
         if !FileManager.default.fileExists(atPath: fileURL.path) {
             root = Self.seedRoot()
@@ -275,9 +386,11 @@ final class ConfigStore {
 
     func save() {
         let config = ToolsConfig(
-            iconName: iconName,
             root: root.map { $0.toConfigItem() },
-            extraScanRoots: extraScanRoots
+            extraScanRoots: extraScanRoots,
+            menuStyle: menuStyle,
+            barLabel: barLabel,
+            statusItemStyle: statusItemStyle
         )
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
